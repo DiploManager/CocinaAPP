@@ -209,9 +209,9 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
 ## 🆘 Soporte
 
-¿Tienes problemas o preguntas? 
-- 📧 Email: soporte@recipeai.com
-- 💬 Discord: [RecipeAI Community](https://discord.gg/recipeai)
+¿Tienes problemas o preguntas?
+- 📧 Email: cuervoortizjuandavid@gmail.com
+- 💬 Discord: [RecipeAI Community](https://discord.gg/EUy3Ckgab)
 - 📖 Wiki: [Documentación completa](https://github.com/recipeai/wiki)
 
 ---
