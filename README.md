@@ -323,7 +323,7 @@ npm install
 ```
 
 ### 📞 **Contacto**
-- 📧 Email: soporte@recipeai.com
+- 📧 Email: cuervoortizjuandavid@gmail.com
 - 💬 Discord: [RecipeAI Community]()
 - 📖 Wiki: [Documentación completa](https://github.com/recipeai/wiki)
 
