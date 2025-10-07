@@ -1,39 +1,63 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, FileText, Camera, CircleAlert as AlertCircle, CircleCheck as CheckCircle } from 'lucide-react';
+import { Upload, FileText, Camera, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { apiClient } from '../lib/api';
+import { useIngredients } from '../hooks/useIngredients';
 
 export function Receipts() {
+  const { addIngredient } = useIngredients();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [processing, setProcessing] = useState(false);
   const [extractedIngredients, setExtractedIngredients] = useState<string[]>([]);
 
+  // Manejar subida de archivos
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     setUploadedFiles(prev => [...prev, ...files]);
   };
 
+  // Procesar facturas con OCR real
   const processReceipts = async () => {
     setProcessing(true);
     
-    // Simulate OCR processing
-    setTimeout(() => {
-      const mockIngredients = [
-        'leche entera', 'pan integral', 'huevos', 'tomates', 'cebolla',
-        'pollo', 'arroz', 'aceite de oliva', 'sal', 'ajo'
-      ];
-      setExtractedIngredients(mockIngredients);
+    try {
+      // Procesar cada archivo subido
+      const allExtractedIngredients: string[] = [];
+      
+      for (const file of uploadedFiles) {
+        const result = await apiClient.uploadReceipt(file);
+        allExtractedIngredients.push(...result.extractedIngredients);
+      }
+      
+      setExtractedIngredients(allExtractedIngredients);
+    } catch (error) {
+      console.error('Error procesando facturas:', error);
+      alert('Error procesando las facturas. Por favor intenta de nuevo.');
+    } finally {
       setProcessing(false);
-    }, 3000);
+    }
   };
 
-  const confirmIngredients = () => {
-    // Here you would typically add the ingredients to the user's list
+  // Confirmar y agregar ingredientes extraídos
+  const confirmIngredients = async () => {
+    try {
+      // Agregar cada ingrediente extraído a la lista del usuario
+      for (const ingredient of extractedIngredients) {
+        await addIngredient(ingredient, undefined, undefined, 'receipt');
+      }
+      
+      alert('¡Ingredientes agregados exitosamente!');
+    } catch (error) {
+      console.error('Error agregando ingredientes:', error);
+      alert('Error agregando ingredientes. Por favor intenta de nuevo.');
+    }
+    
+    // Limpiar estado
     setExtractedIngredients([]);
     setUploadedFiles([]);
-    alert('¡Ingredientes agregados exitosamente!');
   };
 
   return (

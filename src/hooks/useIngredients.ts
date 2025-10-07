@@ -3,6 +3,7 @@ import { Ingredient, IngredientCategory } from '../types';
 import { supabase } from '../lib/supabase';
 import { categorizeIngredient } from '../utils/categories';
 
+// Hook personalizado para gestión de ingredientes
 export function useIngredients() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -12,47 +13,32 @@ export function useIngredients() {
     loadIngredients();
   }, []);
 
+  // Cargar ingredientes desde la API local
   const loadIngredients = async () => {
     try {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        // Load from localStorage for non-authenticated users
-        const stored = localStorage.getItem('ingredients');
-        if (stored) {
-          setIngredients(JSON.parse(stored));
-        }
-        return;
+      // Usar API local
+      const stored = localStorage.getItem('ingredients');
+      if (stored) {
+        const parsedIngredients = JSON.parse(stored).map((item: any) => ({
+          ...item,
+          addedAt: new Date(item.addedAt)
+        }));
+        setIngredients(parsedIngredients);
       }
-
-      const { data, error: supabaseError } = await supabase
-        .from('ingredients')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (supabaseError) throw supabaseError;
-
-      const formattedIngredients: Ingredient[] = (data || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        category: item.category as IngredientCategory,
-        quantity: item.quantity || undefined,
-        unit: item.unit || undefined,
-        addedAt: new Date(item.created_at),
-        source: item.source as 'manual' | 'receipt'
-      }));
-
-      setIngredients(formattedIngredients);
+      
+      // Supabase integration commented out for local testing
+      // const { data: { user } } = await supabase.auth.getUser();
+      // ... Supabase code here
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading ingredients');
-      console.error('Error loading ingredients:', err);
+      setError(err instanceof Error ? err.message : 'Error cargando ingredientes');
+      console.error('Error cargando ingredientes:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  // Agregar nuevo ingrediente
   const addIngredient = async (name: string, quantity?: string, unit?: string, source: 'manual' | 'receipt' = 'manual') => {
     try {
       const category = categorizeIngredient(name);
@@ -66,82 +52,51 @@ export function useIngredients() {
         source
       };
 
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (user) {
-        const { error: supabaseError } = await supabase
-          .from('ingredients')
-          .insert({
-            id: newIngredient.id,
-            user_id: user.id,
-            name: newIngredient.name,
-            category: newIngredient.category,
-            quantity: newIngredient.quantity,
-            unit: newIngredient.unit,
-            source: newIngredient.source
-          });
-
-        if (supabaseError) throw supabaseError;
-      } else {
-        // Store locally for non-authenticated users
-        const updatedIngredients = [newIngredient, ...ingredients];
-        localStorage.setItem('ingredients', JSON.stringify(updatedIngredients));
-        setIngredients(updatedIngredients);
-      }
-
-      if (user) {
-        await loadIngredients();
-      }
+      // Always use localStorage for local testing
+      const updatedIngredients = [newIngredient, ...ingredients];
+      localStorage.setItem('ingredients', JSON.stringify(updatedIngredients));
+      setIngredients(updatedIngredients);
+      
+      // Supabase integration commented out for local testing
+      // const { data: { user } } = await supabase.auth.getUser();
+      // ... Supabase code here
 
       return newIngredient;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error adding ingredient');
+      setError(err instanceof Error ? err.message : 'Error agregando ingrediente');
       throw err;
     }
   };
 
+  // Eliminar ingrediente
   const removeIngredient = async (id: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (user) {
-        const { error: supabaseError } = await supabase
-          .from('ingredients')
-          .delete()
-          .eq('id', id)
-          .eq('user_id', user.id);
-
-        if (supabaseError) throw supabaseError;
-        await loadIngredients();
-      } else {
-        const updatedIngredients = ingredients.filter(ingredient => ingredient.id !== id);
-        localStorage.setItem('ingredients', JSON.stringify(updatedIngredients));
-        setIngredients(updatedIngredients);
-      }
+      // Always use localStorage for local testing
+      const updatedIngredients = ingredients.filter(ingredient => ingredient.id !== id);
+      localStorage.setItem('ingredients', JSON.stringify(updatedIngredients));
+      setIngredients(updatedIngredients);
+      
+      // Supabase integration commented out for local testing
+      // const { data: { user } } = await supabase.auth.getUser();
+      // ... Supabase code here
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error removing ingredient');
+      setError(err instanceof Error ? err.message : 'Error eliminando ingrediente');
       throw err;
     }
   };
 
+  // Limpiar todos los ingredientes
   const clearIngredients = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (user) {
-        const { error: supabaseError } = await supabase
-          .from('ingredients')
-          .delete()
-          .eq('user_id', user.id);
-
-        if (supabaseError) throw supabaseError;
-      } else {
-        localStorage.removeItem('ingredients');
-      }
-
+      // Always use localStorage for local testing
+      localStorage.removeItem('ingredients');
       setIngredients([]);
+      
+      // Supabase integration commented out for local testing
+      // const { data: { user } } = await supabase.auth.getUser();
+      // ... Supabase code here
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error clearing ingredients');
+      setError(err instanceof Error ? err.message : 'Error limpiando ingredientes');
       throw err;
     }
   };

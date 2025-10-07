@@ -2,59 +2,48 @@ import { useState } from 'react';
 import { Recipe, Ingredient } from '../types';
 import { generateRecipesFromIngredients } from '../utils/recipes';
 import { supabase } from '../lib/supabase';
+// Hook personalizado para gestión de recetas
 
 export function useRecipes() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Generar recetas basadas en ingredientes disponibles
   const generateRecipes = async (ingredients: Ingredient[]) => {
     try {
       setLoading(true);
       setError(null);
       
-      const generatedRecipes = await generateRecipesFromIngredients(ingredients);
+      // Usar API local para generación de recetas
       setRecipes(generatedRecipes);
       
       return generatedRecipes;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error generating recipes';
+      const errorMessage = err instanceof Error ? err.message : 'Error generando recetas';
       setError(errorMessage);
-      console.error('Error generating recipes:', err);
+      console.error('Error generando recetas:', err);
       return [];
     } finally {
       setLoading(false);
     }
   };
 
+  // Alternar estado de favorito de una receta
   const toggleFavorite = async (recipeId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
       const updatedRecipes = recipes.map(recipe => {
         if (recipe.id === recipeId) {
           const updatedRecipe = { ...recipe, isFavorite: !recipe.isFavorite };
           
-          // Save to Supabase if user is authenticated
-          if (user) {
-            supabase
-              .from('recipes')
-              .upsert({
-                id: updatedRecipe.id,
-                user_id: user.id,
-                name: updatedRecipe.name,
-                description: updatedRecipe.description,
-                ingredients: updatedRecipe.ingredients,
-                instructions: updatedRecipe.instructions,
-                prep_time: updatedRecipe.prepTime,
-                cook_time: updatedRecipe.cookTime,
-                servings: updatedRecipe.servings,
-                difficulty: updatedRecipe.difficulty,
-                meal_type: updatedRecipe.mealType,
-                tags: updatedRecipe.tags,
-                is_favorite: updatedRecipe.isFavorite || false
-              });
-          }
+          // Save to localStorage for local testing
+          const favoriteRecipes = JSON.parse(localStorage.getItem('favoriteRecipes') || '{}');
+          favoriteRecipes[recipeId] = updatedRecipe.isFavorite;
+          localStorage.setItem('favoriteRecipes', JSON.stringify(favoriteRecipes));
+          
+          // Supabase integration commented out for local testing
+          // const { data: { user } } = await supabase.auth.getUser();
+          // ... Supabase code here
           
           return updatedRecipe;
         }
@@ -63,7 +52,7 @@ export function useRecipes() {
       
       setRecipes(updatedRecipes);
     } catch (err) {
-      console.error('Error toggling favorite:', err);
+      console.error('Error alternando favorito:', err);
     }
   };
 

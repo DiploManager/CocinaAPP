@@ -8,7 +8,7 @@ import { Receipts } from './pages/Receipts';
 import { Settings } from './pages/Settings';
 
 function App() {
-  // Register service worker for PWA
+  // Registrar trabajador de servicio para PWA
   React.useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')

@@ -46,10 +46,13 @@ export function Settings() {
   };
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) console.error('Error signing out:', error);
+    // Mock sign out for local testing
     setUser(null);
     setEmail('');
+    
+    // Supabase integration commented out for local testing
+    // const { error } = await supabase.auth.signOut();
+    // if (error) console.error('Error signing out:', error);
   };
 
   const installPWA = () => {
