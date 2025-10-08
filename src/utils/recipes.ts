@@ -20,7 +20,7 @@ export function getMealTypeLabel(mealType: MealType): string {
 }
 
 export async function generateRecipesFromIngredients(ingredients: Ingredient[]): Promise<Recipe[]> {
-  // Simulated AI recipe generation - in production this would call an AI API
+  // Generación de recetas de IA simulada: en producción, esto se llamaría API de IA
   const mealType = getCurrentMealType();
   const availableIngredients = ingredients.map(i => i.name);
   
@@ -85,7 +85,7 @@ export async function generateRecipesFromIngredients(ingredients: Ingredient[]):
     }
   ];
 
-  // Filter recipes based on available ingredients
+  // Filtrar recetas según los ingredientes disponibles.
   return recipes.filter(recipe => {
     const matchingIngredients = recipe.ingredients.filter(ingredient => 
       availableIngredients.some(available => 
